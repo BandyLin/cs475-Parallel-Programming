@@ -1,8 +1,9 @@
 #include <omp.h>
 #include <stdio.h>
+#include <iostream>
 #include <math.h>
 
-#define NUM 8
+#define NUMT 8
 #define NUMNODES 50
 
 #define XMIN     0.
@@ -107,7 +108,7 @@ int main( int argc, char *argv[ ] )
         if (iu == 0 ||iu == (NUMNODES-1)) {
             temp = temp / 2;
         }
-        v = v + temp;
+        volume = volume + temp;
     }
     double time_finish = omp_get_wtime();
     double time_total = time_finish - time_begin;
