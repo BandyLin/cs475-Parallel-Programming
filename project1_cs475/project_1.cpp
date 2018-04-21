@@ -115,5 +115,5 @@ int main( int argc, char *argv[ ] )
     
     
     //Display results
-    std::cout << " Nodes: " << NUMNODES << "Threads: " << NUMT << " Time(ms): " << time_total << " Volume\n" <<  v;
+    std::cout << " Nodes: " << NUMNODES << " Threads: " << NUMT << " Time(ms): " << time_total << " Volume: " <<  volume << "\n";
 }
