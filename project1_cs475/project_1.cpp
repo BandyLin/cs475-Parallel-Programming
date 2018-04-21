@@ -3,8 +3,8 @@
 #include <iostream>
 #include <math.h>
 
-#define NUMT 8
-#define NUMNODES 50
+#define NUMT 2
+#define NUMNODES 10000
 
 #define XMIN     0.
 #define XMAX     3.
