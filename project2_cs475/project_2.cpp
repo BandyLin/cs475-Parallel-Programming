@@ -12,8 +12,10 @@ const double EARTH_MASS           = 5.9742e24;     // kg
 const double EARTH_DIAMETER       = 12756000.32;   // meters
 const double TIMESTEP             =   1.0; // secs
 
-#define NUMBODIES         100
-#define NUMSTEPS           200
+#define NUMBODIES 100
+#define NUMSTEPS 200
+#define NUMTHREADS 30
+#define SCHEDULE static
 
 struct body
 {
@@ -57,12 +59,16 @@ int main( int argc, char *argv[ ] )
     double time0 = omp_get_wtime( );
     for( int t = 0; t < NUMSTEPS; t++ )
     {
+        //Coarse Grained
+    //#pragma omp parallel for default(none), shared(Bodies), schedule(SCHEDULE)
         for( int i = 0; i < NUMBODIES; i++ )
         {
             float fx = 0.;
             float fy = 0.;
             float fz = 0.;
             Body *bi = &Bodies[i];
+            //Fine Grained
+            #pragma omp parallel for default(none), shared(i, bi, Bodies), reduction(+:fx, fy, fz), schedule(SCHEDULE)
             for( int j = 0; j < NUMBODIES; j++ )
             {
                 if( j == i )     continue;
@@ -102,6 +108,8 @@ int main( int argc, char *argv[ ] )
     }  // t
     double time1 = omp_get_wtime( );
     // print performance here:::
+    float MegaBodies =  ((float)(NUMBODIES*NUMBODIES*NUMSTEPS)/(time1-time0)/1000000);
+    std::cout << "Numbodies: " << NUMBODIES << " Numsteps: " << NUMSTEPS << " Numthreads: " << NUMTHREADS << " MegaBodies: " << MegaBodies << "\n";
     return 0;
 }
 
