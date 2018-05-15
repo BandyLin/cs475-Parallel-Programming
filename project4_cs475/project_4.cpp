@@ -7,7 +7,7 @@
 #include <omp.h>
 
 // starting date and time:
-int    NowYear = 2017;        // 2017 - 2022
+int    NowYear = 2017;        // 2018 - 2022
 int    NowMonth = 0;        // 0 - 11
 
 float    NowPrecip;        // inches of rain per month
