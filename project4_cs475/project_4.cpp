@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -12,6 +13,8 @@ float    NowPrecip;        // inches of rain per month
 float    NowTemp;        // temperature this month
 float    NowHeight;        // grain height in inches
 int    NowNumDeer;        // number of deer in the current population
+unsigned int seed = 0;  // a thread-private variable
+float x = Ranf( &seed;, -1.f, 1.f );
 
 const float GRAIN_GROWS_PER_MONTH =        8.0;
 const float ONE_DEER_EATS_PER_MONTH =        0.5;
@@ -43,15 +46,15 @@ void GrainDeer() {
         . . .
         
         // DoneComputing barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DoneAssigning barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DonePrinting barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
     }
 }
@@ -64,24 +67,25 @@ void Grain(){
         . . .
         
         // DoneComputing barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DoneAssigning barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DonePrinting barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
     }
-float tempFactor = exp(   -SQR(  ( NowTemp - MIDTEMP ) / 10.  )   );
-
-float precipFactor = exp(   -SQR(  ( NowPrecip - MIDPRECIP ) / 10.  )   );
+    float tempFactor = exp(   -SQR(  ( NowTemp - MIDTEMP ) / 10.  )   );
+    
+    float precipFactor = exp(   -SQR(  ( NowPrecip - MIDPRECIP ) / 10.  )   );
     NowHeight += tempFactor * precipFactor * GRAIN_GROWS_PER_MONTH;
     NowHeight -= (float)NowNumDeer * ONE_DEER_EATS_PER_MONTH;
-
+    
 }
+
 void Watcher() {
     while( NowYear < 2023 )
     {
@@ -90,18 +94,19 @@ void Watcher() {
         . . .
         
         // DoneComputing barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DoneAssigning barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DonePrinting barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
     }
 }
+
 void MyAgent() {
     while( NowYear < 2023 )
     {
@@ -110,31 +115,42 @@ void MyAgent() {
         . . .
         
         // DoneComputing barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DoneAssigning barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
         
         // DonePrinting barrier:
-#pragma omp barrier
+        #pragma omp barrier
         . . .
     }
 }
-float
-SQR( float x )
-{
+
+float SQR( float x ) {
     return x*x;
 }
 
-int main( int argc, char *argv[ ] ) {
-#ifndef _OPENMP
-    fprintf( stderr, "OpenMP is not available\n" );
-    return 1;
-#endif
-    float ang = (  30.*(float)NowMonth + 15.  ) * ( M_PI / 180. );
+float Ranf( unsigned int *seedp,  float low, float high ) {
+    float r = (float) rand_r( seedp );              // 0 - RAND_MAX
     
+    return(   low  +  r * ( high - low ) / (float)RAND_MAX   );
+}
+
+int Ranf( unsigned int *seedp, int ilow, int ihigh ) {
+    float low = (float)ilow;
+    float high = (float)ihigh + 0.9999f;
+    
+    return (int)(  Ranf(seedp, low,high) );
+}
+
+int main( int argc, char *argv[ ] ) {
+    #ifndef _OPENMP
+        fprintf( stderr, "OpenMP is not available\n" );
+        return 1;
+    #endif
+    float ang = (  30.*(float)NowMonth + 15.  ) * ( M_PI / 180. );
     float temp = AVG_TEMP - AMP_TEMP * cos( ang );
     unsigned int seed = 0;
     NowTemp = temp + Ranf( &seed;, -RANDOM_TEMP, RANDOM_TEMP );
@@ -144,24 +160,24 @@ int main( int argc, char *argv[ ] ) {
     if( NowPrecip < 0. )
         NowPrecip = 0.;
     omp_set_num_threads( 4 );    // same as # of sections
-#pragma omp parallel sections
+    #pragma omp parallel sections
     {
-#pragma omp section
+        #pragma omp section
         {
             GrainDeer( );
         }
         
-#pragma omp section
+        #pragma omp section
         {
             Grain( );
         }
         
-#pragma omp section
+        #pragma omp section
         {
             Watcher( );
         }
         
-#pragma omp section
+        #pragma omp section
         {
             MyAgent( );    // your own
         }
@@ -170,4 +186,3 @@ int main( int argc, char *argv[ ] ) {
     
     return 0;
 }
-
