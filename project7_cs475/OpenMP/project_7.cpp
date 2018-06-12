@@ -3,7 +3,7 @@
 #include <math.h>
 #include <iostream>
 
-#define NUMT	         4
+#define NUMT	         1
 #define ARRAYSIZE       10000	// you decide
 #define NUMTRIES        100	// you decide
 
@@ -43,6 +43,7 @@ main( )
             Array[i+Size] = Array[i];        // duplicate the array
         }
         fclose( fp );
+        double time0 = omp_get_wtime( );
 #pragma omp parallel for
         for( int shift = 0; shift < 512; shift++ )
         {
@@ -54,7 +55,8 @@ main( )
             Sums[shift] = sum;    // note the "fix #2" from false sharing if you are using OpenMP
             std::cout << " Shift: " << shift << " Sum: " << sum << "\n";
         }
-
+        double time1 = omp_get_wtime( );
+        std::cout << " GigaMultsPerSecond: " << (double)Size/(time1-time0)/1000000000 << "\n";
 	// note: %lf stands for "long float", which is how printf prints a "double"
 	//        %d stands for "decimal integer", not "double"
 

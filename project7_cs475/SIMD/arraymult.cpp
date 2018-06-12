@@ -47,6 +47,7 @@ int main( int argc, char *argv[ ] ) {
         A[i+Size] = (&seed, Array[i], Array[i]);
     }
     fclose( fp );
+    double time0 = omp_get_wtime( );
     for( int shift = 0; shift < 513; shift++ )
     {
         float sum = 0.;
@@ -57,5 +58,7 @@ int main( int argc, char *argv[ ] ) {
         Sums[shift] = sum;    // note the "fix #2" from false sharing if you are using OpenMP
         std::cout << " Shift: " << shift << " Sum: " << sum << "\n";
     }
+    double time1 = omp_get_wtime( );
+    std::cout << " GigaMultsPerSecond: " << (double)Size/(time1-time0)/1000000000 << "\n";
     return 0;
 }

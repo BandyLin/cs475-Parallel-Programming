@@ -84,6 +84,7 @@ main( int argc, char *argv[ ] )
         fscanf( fd, "%f", &Array[i] );
         Array[i+Size] = Array[i];        // duplicate the array
     }
+    double time0 = omp_get_wtime( );
     for( int shift = 0; shift < 513; shift++ )
     {
         float sum = 0.;
@@ -94,6 +95,7 @@ main( int argc, char *argv[ ] )
         Sums[shift] = sum;    // note the "fix #2" from false sharing if you are using OpenMP
         std::cout << " Shift: " << shift << " Sum: " << sum << "\n";
     }
+    double time1 = omp_get_wtime( );
     fclose( fd );
 
     // 3. create an opencl context:
@@ -197,17 +199,11 @@ main( int argc, char *argv[ ] )
 
     Wait( cmdQueue );
 
-    double time0 = omp_get_wtime( );
-
-    time0 = omp_get_wtime( );
-
     status = clEnqueueNDRangeKernel( cmdQueue, kernel, 1, NULL , globalWorkSize, localWorkSize, 0, NULL, NULL );
     if( status != CL_SUCCESS )
         //fprintf( stderr, "clEnqueueNDRangeKernel failed: %d\n", status );
 
     Wait( cmdQueue );
-
-    double time1 = omp_get_wtime( );
 
     // 12. read the results buffer back from the device to the host:
 
